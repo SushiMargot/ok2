@@ -1,5 +1,7 @@
 package niveau_vues;
 
+import java.awt.Color;
+import java.awt.Paint;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -7,7 +9,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import fr.lri.swingstates.canvas.CShape;
+import fr.lri.swingstates.canvas.CStateMachine;
 import fr.lri.swingstates.canvas.Canvas;
+import fr.lri.swingstates.canvas.transitions.ClickOnShape;
+import fr.lri.swingstates.canvas.transitions.DragOnShape;
+import fr.lri.swingstates.sm.State;
+import fr.lri.swingstates.sm.Transition;
+import fr.lri.swingstates.sm.transitions.Drag;
+import fr.lri.swingstates.sm.transitions.Press;
+import fr.lri.swingstates.sm.transitions.Release;
 import shapes.BoardShape;
 import shapes.Shape;
 import shapes.ToolShape;
@@ -38,41 +48,44 @@ public class Niveau extends Canvas{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-
 	}
+
+
+
+
+	
 
 	public void displayEntete(){
-		
+
 	}
-	
+
 	public void displayTools(){
-		
-		
+
+
 	}
-	
-	
-	
-	
+
+
+
+
 	private void openFile(String filename) throws IOException{
-		
+
 		String level="";
 		BufferedReader br = new BufferedReader(new FileReader(filename));
 		try {
-		    StringBuilder sb = new StringBuilder();
-		    String line = br.readLine();
+			StringBuilder sb = new StringBuilder();
+			String line = br.readLine();
 
-		    while (line != null) {
-		        sb.append(line);
-		        sb.append(System.lineSeparator());
-		        line = br.readLine();
-		    }
-		    level = sb.toString();
-		    
+			while (line != null) {
+				sb.append(line);
+				sb.append(System.lineSeparator());
+				line = br.readLine();
+			}
+			level = sb.toString();
+
 		} finally {
-		    br.close();
+			br.close();
 		}
-		
+
 		String[] parts=level.split("\n");
 		int nbShapes = Integer.parseInt(parts[0]);
 		for(int i=1; i<nbShapes+1; i++){
@@ -85,23 +98,23 @@ public class Niveau extends Canvas{
 			toolshape.setColor(colors);
 			//traitement des points
 			String[] def_shape= color_and_points[1].split(" ");
-			
+
 			for(int j=0; j<def_shape.length; j+=2){
 				Point p_tools = new Point (Integer.parseInt(def_shape[j]), Integer.parseInt(def_shape[j+1]));
 				Point p_board = new Point (Integer.parseInt(def_shape[j]), Integer.parseInt(def_shape[j+1]));
-				
+
 				p_board.translate(0,h_board);
-				
+
 				toolshape.addPoint(p_tools);
 				System.out.println(p_board.x + " "+p_board.y);
 				System.out.println(p_tools.x + " "+p_tools.y);
-				
+
 				boardshape.addPoint(p_board);
 			}
 			boardshape.createShape();
 			toolshape.createShape();
 		}
-		
+
 	}
 
 
