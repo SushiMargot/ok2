@@ -9,6 +9,7 @@ import fr.lri.swingstates.canvas.CStateMachine;
 import fr.lri.swingstates.canvas.Canvas;
 import fr.lri.swingstates.canvas.transitions.ClickOnShape;
 import fr.lri.swingstates.canvas.transitions.DragOnShape;
+import fr.lri.swingstates.canvas.transitions.PressOnShape;
 import fr.lri.swingstates.sm.State;
 import fr.lri.swingstates.sm.Transition;
 import fr.lri.swingstates.sm.transitions.Click;
@@ -18,78 +19,105 @@ import utilities.Point;
 
 public class ToolShape extends Shape {
 
-	private boolean isPlaced;
-	private Point2D prevPoint;
-	
+
+	public boolean movable;
+	public Point centreGravite;
+
+
 	public ToolShape(Canvas c) {
 		super(c);
-		this.isPlaced=false;
-		//du caca
-				CStateMachine shapeMachine = new CStateMachine() {
-					public State start = new State() {
-						ClickOnShape click = new ClickOnShape(BUTTON1, NOMODIFIER, ">> move") {
-							public void action() {
-								//IL FAUT ABSOLUMENT VIRER CETTE CONDITION
-								if(getShape().equals(shape)){
-								Paint initColor = shape.getFillPaint();
-								prevPoint = getPoint();
-								shape.setFillPaint(Color.PINK);
-								}
-							}
-						};
-						
-					};
-					State move = new State() {
-						DragOnShape drag = new DragOnShape(BUTTON1, NOMODIFIER) {
-							public void action() {
-								if(getShape().equals(shape)){
-								Point2D new_point = getPoint();	
-								shape.translateBy(new_point.getX()-prevPoint.getX(), new_point.getY()-prevPoint.getY());
-								prevPoint=new_point;
-							}
-							}
-						};	
-						Release release = new Release(BUTTON1, NOMODIFIER, ">> start") {
-							public void action() {
-								
-							}
-						};
-					};
-				};
-				shapeMachine.attachTo(cnvs);
+		this.movable=true;
+		computeCtrGrav();
 
-				//fin du caca
+
 	}
+	//TODO: DEBUG LE ROTATE DU DEBUT
 
-	public boolean equals(BoardShape sh){
-		if(this.pointList.size()!= sh.pointList.size())
-			return false;
-		else{
-			this.isPlaced= rec_equals(this.pointList, sh.pointList);
-			return this.isPlaced;
+	public void computeCtrGrav(){
+		if(pointList.size()!=0){
+			int gx = 0;
+			int gy = 0;
+			for(int i=0; i<pointList.size();i++) {
+				gx+= pointList.get(i).getX();
+				gy+= pointList.get(i).getY();
+			}
+			this.centreGravite = new Point(this.getCenterX(),this.getCenterY());
 		}
 	}
+
+	//regarde si la shape est à la même position qu'une des shapes grises, 
 	
-	//verifie recursivement si les arraylist de points correspondent
-	private boolean rec_equals(ArrayList<Point> tl_points, ArrayList<Point> sh_points){
-		if(tl_points.size()==0 && sh_points.size()==0){
-			return true;
-		}
-	
-		for(int i = 0; i< tl_points.size(); i++){
-			for(int j = 0; j< sh_points.size(); j++){
-				if (tl_points.get(i).equals(sh_points.get(j))){
-					ArrayList<Point> newtl_points = create_newArray(tl_points, i);
-					ArrayList<Point> newsh_points = create_newArray(sh_points, j);
-					rec_equals(newtl_points, newsh_points);
-					
+	public boolean samePosition(ArrayList<BoardShape> boardlist){
+		for(BoardShape sh : boardlist){
+			//si les deux shapes ont le meme nombre de sommets
+			if( this.pointList.size()== sh.pointList.size()){
+				//si les points sont les memes
+				if( rec_equals(this.pointList, sh.pointList)){
+					//on translate et on met a jour la shape bougee
+					this.translateTo(sh.getCenterX(), sh.getCenterY());
+					for(int i = 0; i<pointList.size();i++){
+						this.pointList.set(i, sh.pointList.get(i).copy());
+						//this.createShape();
+					}
+					//maj du centre de gravite
+					computeCtrGrav();
+					return true;
 				}
+				
 			}
 		}
 		return false;
-		
 	}
-	
+
+	//verifie recursivement si les arraylist de points correspondent
+	private boolean rec_equals(ArrayList<Point> tl_points, ArrayList<Point> sh_points){
+		if(tl_points.size()==0 || sh_points.size()==0){
+
+			return true;
+		}
+
+		for(int i = 0; i< tl_points.size(); i++){
+			for(int j = 0; j< sh_points.size(); j++){
+				if (tl_points.get(i).almstEquals(sh_points.get(j))){
+
+					ArrayList<Point> newtl_points = create_newArray(tl_points, i);
+					ArrayList<Point> newsh_points = create_newArray(sh_points, j);
+
+					return rec_equals(newtl_points, newsh_points);
+
+				}
+
+			}
+		}
+		return false;
+
+	}
+
+	public void setMovable(boolean m){
+		this.movable=m;
+	}
+	public boolean getMovable( ){
+		return this.movable;
+	}
+
+	public void translate(double tx, double ty){
+		this.translateBy(tx, ty);
+		for(Point p: pointList){
+			p.translate(tx, ty);
+		}
+		computeCtrGrav();
+	}
+
+	public void rotate(double d){
+		//this.rotateBy(Math.toRadians(d));
+		System.out.println(pointList.get(0).getX());
+		for(Point p : pointList){
+			p.rotate(Math.toRadians(d), this.centreGravite);
+		}
+		computeCtrGrav();
+	}
+
+
 	//Cree une arrayList a partir d'une arraylist sans l'objet a la place indice
 	private ArrayList<Point> create_newArray(ArrayList<Point> prev_array, int indice){
 		ArrayList<Point> new_array = new ArrayList<Point>();

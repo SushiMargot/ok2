@@ -218,6 +218,7 @@ public class BoutonMenu {
 		showStateMachine(dragger);
 	}
 	public void doAction(JFrame frame){
+		//TODO : cststes de 400 500
 		Niveau panel= new Niveau("niveau0",400,500);
 		frame.setContentPane(panel); //panel = panel you want to change too.
 		//panel.make_display(frame);

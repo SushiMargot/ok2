@@ -15,7 +15,7 @@ import fr.lri.swingstates.sm.Transition;
 import fr.lri.swingstates.sm.transitions.Click;
 import utilities.Point;
 
-public abstract class Shape {
+public  class Shape extends CPolyLine {
 	ArrayList<Point> pointList;
 	CPolyLine shape;
 	Canvas cnvs;
@@ -24,9 +24,9 @@ public abstract class Shape {
 
 	public Shape(Canvas c){	
 		pointList=new ArrayList<Point>();
-		this.shape=new CPolyLine();
+		//this.shape=new CPolyLine();
 		this.cnvs=c;
-		shape =cnvs.newPolyLine();
+		this.addTo(c);
 
 
 		
@@ -49,13 +49,14 @@ public abstract class Shape {
 	//TODO: faire classe Point
 	public void createShape(){
 		Point frstPoint = pointList.get(0);
-		this.shape.reset(frstPoint.x, frstPoint.y);
+		this.reset(frstPoint);
 		for(int i = 1; i<pointList.size();i++){
-			this.shape.lineTo(pointList.get(i).x, pointList.get(i).y);
+			this.lineTo(pointList.get(i));
 		}
 		//on referme
-		this.shape.lineTo(frstPoint.x,frstPoint.y);
-		this.shape.setFillPaint(clr);
+		this.lineTo(frstPoint);
+		this.setFillPaint(clr);
+		this.addTo(cnvs);
 	}
 
 
